@@ -1,0 +1,51 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "ES2017",
+    "module": "commonjs",
+    "lib": ["ES6"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "removeComments": true,
+    "importHelpers": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "preserveConstEnums": true,
+    "paths": {
+      "@adapters": ["./src/adapters/index.ts"],
+      "@adapters/*": ["./src/adapters/*"],
+      "@business": ["./src/business/index.ts"],
+      "@business/*": ["./src/business/*"],
+      "@config": ["./src/config/index.ts"],
+      "@config/*": ["./src/config/*"],
+      "@models": ["./src/models/index.ts"],
+      "@models/*": ["./src/models/*"],
+      "@ports": ["./src/ports/index.ts"],
+      "@ports/*": ["./src/ports/*"],
+      "@utils": ["./src/utils/index.ts"],
+      "@utils/*": ["./src/utils/*"]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

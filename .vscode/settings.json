@@ -1,0 +1,15 @@
+{
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "editor.formatOnSave": true,
+  "eslint.workingDirectories": [
+    "./src/"
+  ],
+  "vscode-coverage-highlighter.files": [
+    "reports/coverage/coverage-final.json",
+    "reports/coverage/lcov*.info",
+    "reports/cov*.xml"
+  ]
+}

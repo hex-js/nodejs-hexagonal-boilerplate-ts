@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "brainfit.vscode-coverage-highlighter",
+    "dbaeumer.vscode-eslint",
+    "hashicorp.terraform"
+  ]
+}

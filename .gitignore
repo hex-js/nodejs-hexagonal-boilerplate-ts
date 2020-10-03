@@ -1,0 +1,17 @@
+.DS_Store
+node_modules
+dist
+.env
+yarn-error.log
+.serverless
+.localstack
+**/*/.terraform
+**/*/terraform.tfstate
+**/*/terraform.tfstate.backup
+test-results
+.scannerwork/
+reports/
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+.stryker-tmp
