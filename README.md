@@ -86,7 +86,7 @@ Na integração contínua o localstack é amigável para manter o mesmo ambiente
 
 É bem simples de já começar rodando
 
-1. Configure o `.env` baseado no `.env.example`;
+1. configure o `.env` baseado no `.env.localstack`;
 2. ligue o localstack com `docker-compose up -d`;
 3. levante o ambiente demo usando [terraform](https://www.terraform.io/) com os comandos:
 ```bash
@@ -94,13 +94,14 @@ $terraform init
 $terraform plan (avalia se é isso mesmo que quer criar)
 $terraform apply
 ```
-4. instale as dependências com `yarn install`; e
-5. rode o projeto com yarn start.
+4. instale as dependências com `yarn install`;
+5. configure o `.env` agora baseado no `.env.dev`;
+6. rode o projeto com yarn start;
 
 Irá levantar uma instância de serviço http(Express), e seja feliz no consumo
 
 ## Features desse boilerplate
 
-1. JsDoc implementado em todos os métodos e separados em namespaces na documentação que é gerado toda vez que aplica commit;
-2. localstack como ambiente de simulação; e
-3. Javascript ECMA 2015 com linters que te ajudam a manter o código funcional e puro.
+1. localstack como ambiente de simulação; e
+2. TypeScript que te ajudam a manter o código com tipagem razoável.
+3. Linters que te ajudam a manter o código funcional e puro.
