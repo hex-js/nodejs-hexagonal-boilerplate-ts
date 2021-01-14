@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "${var.region}"
+  region = var.region
 
   endpoints {
     dynamodb   = "http://localhost:4566"
@@ -11,8 +11,6 @@ provider "aws" {
     # sts for full experience without valid real profile on aws
     sts = "http://localhost:4566"
   }
-
-  version = "~> 2.62"
 
   profile = "localstack"
 }
