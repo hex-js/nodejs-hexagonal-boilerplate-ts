@@ -15,3 +15,4 @@ terraform.tfstate
 terraform.tfstate.backup
 .terraform/
 .stryker-tmp
+iaac/localstack/.terraform.lock.hcl
