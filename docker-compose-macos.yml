@@ -1,5 +1,15 @@
 version: "3.8"
 services:
+  socat:
+    image: bpack/socat
+    container_name: "socat_${PROJECT_NAME}"
+    command: TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock
+    networks:
+      - inner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "2375"
   dynamo-admin:
     image: instructure/dynamo-local-admin
     container_name: "dynamoadmin_${PROJECT_NAME}"
@@ -27,7 +37,7 @@ services:
       - DEBUG=${DEBUG-1}
       - DATA_DIR=${DATA_DIR-}
       - PORT_WEB_UI=${PORT_WEB_UI-8080}
-      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DOCKER_HOST=tcp://socat:2375
       - HOST_TMP_FOLDER=${PWD}
       - LAMBDA_DOCKER_NETWORK=${PROJECT_NAME}
       - AWS_REGION=${AWS_REGION}
@@ -36,7 +46,8 @@ services:
       - LAMBDA_REMOTE_DOCKER=${LAMBDA_REMOTE_DOCKER-0}
     volumes:
       - ${PWD}/.localstack/tmp/localstack:/tmp/localstack
-      - "/var/run/docker.sock:/var/run/docker.sock"
+    links:
+      - socat
 networks:
   inner:
     name: ${PROJECT_NAME}
