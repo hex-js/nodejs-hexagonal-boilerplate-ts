@@ -27,28 +27,28 @@ export enum EPriority {
 export type UserID = string
 
 export type Todo = ModelBase & {
-  taskOrder: number
-  taskDescription: string
-  taskOwner: UserID
-  taskStatus: ETodoStatus
-  taskPriority: EPriority
+  readonly taskOrder: number
+  readonly taskDescription: string
+  readonly taskOwner: UserID
+  readonly taskStatus: ETodoStatus
+  readonly taskPriority: EPriority
 }
 
 export type CreateTodoInput = {
-  taskDescription: string
-  taskPriority?: EPriority
+  readonly taskDescription: string
+  readonly taskPriority?: EPriority
 }
 
 export type MutateTodoInput = {
-  taskOrder?: number
-  taskDescription?: string
-  taskStatus?: ETodoStatus
-  taskPriority?: EPriority
+  readonly taskOrder?: number
+  readonly taskDescription?: string
+  readonly taskStatus?: ETodoStatus
+  readonly taskPriority?: EPriority
 }
 
 export type MutateTodoOutput = {
-  taskDescription: string
-  taskStatus: ETodoStatus
-  taskPriority: EPriority
-  updatedAt: string
+  readonly taskDescription: string
+  readonly taskStatus: ETodoStatus
+  readonly taskPriority: EPriority
+  readonly updatedAt: string
 }

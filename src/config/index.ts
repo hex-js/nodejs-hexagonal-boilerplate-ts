@@ -2,6 +2,7 @@ import { config } from 'dotenv'
 import R from 'ramda'
 import { getEnv } from './environments'
 
+// eslint-disable-next-line functional/no-expression-statement
 config()
 
 /**

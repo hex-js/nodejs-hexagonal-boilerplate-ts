@@ -1,5 +1,5 @@
 export type ModelBase = {
-  id: string
-  createdAt: string
-  updatedAt: string
+  readonly id: string
+  readonly createdAt: string
+  readonly updatedAt: string
 }
