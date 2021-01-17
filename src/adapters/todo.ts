@@ -1,4 +1,4 @@
-import { DynamoRepositoryInstance } from '@ports/state-machines'
+import { DynamoRepositoryInstance } from '@ports/aws-dynamo'
 import { CreateTodoInput, MutateTodoInput, Todo } from '@models'
 import {
   EClassError,
@@ -8,10 +8,10 @@ import { validateUpdateTodo, validateCreateTodo, validateDeleteTodo } from '@bus
 import { EscribaLogger } from '@ports/logger'
 
 export type TodoAdapterInstance = {
-  getTodo: (id: string) => Promise<Todo | null>
-  createTodo: (params: CreateTodoInput, user: string) => Promise<Todo>
-  updateTodo: (id: string, params: MutateTodoInput, user: string) => Promise<Todo>
-  deleteTodo: (id: string, user: string) => Promise<Todo>
+  readonly getTodo: (id: string) => Promise<Todo | null>
+  readonly createTodo: (params: CreateTodoInput, user: string) => Promise<Todo>
+  readonly updateTodo: (id: string, params: MutateTodoInput, user: string) => Promise<Todo>
+  readonly deleteTodo: (id: string, user: string) => Promise<Todo>
 }
 
 /**
@@ -19,7 +19,7 @@ export type TodoAdapterInstance = {
  * @memberof adapters
  * @function
  * @param {EscribaLogger} escriba instance of escriba logger
- * @param {DynamoRepositoryInstance<Todo>} repository state-machine database methods
+ * @param {DynamoRepositoryInstance<Todo>} repository Dynamo database methods
  */
 const todoAdapterFactory = (escriba: EscribaLogger, repository: DynamoRepositoryInstance<Todo>): TodoAdapterInstance => ({
   getTodo: getTodo(repository),
@@ -34,12 +34,13 @@ export default todoAdapterFactory
  * @description Handler function to get todo data by id .
  * @memberof adapters
  * @function
- * @param {DynamoRepositoryInstance<Todo>} repository - State-machine database methods.
+ * @param {DynamoRepositoryInstance<Todo>} repository - Dynamo database methods.
  */
 const getTodo = (repository: DynamoRepositoryInstance<Todo>) => async (id: string) => {
   const methodPath = 'adapters.todo.getTodo'
   try {
-    return await repository.getDocument({ id })
+    const result = await repository.getDocument({ id })
+    return result.value
   } catch (error) {
     return throwCustomError(error, methodPath, EClassError.INTERNAL)
   }
@@ -49,12 +50,12 @@ const getTodo = (repository: DynamoRepositoryInstance<Todo>) => async (id: strin
  * @description Create todo in the DynamoDB.
  * @function
  * @param {EscribaLogger} escriba instance of escriba
- * @param {DynamoRepositoryInstance<Todo>} repository state-machine database methods
+ * @param {DynamoRepositoryInstance<Todo>} repository Dynamo database methods
  */
 const createTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance<Todo>) => async (params: CreateTodoInput, user: string) => {
   const methodPath = 'adapters.todo.createTodo'
   try {
-    const documentInserted = await repository
+    const result = await repository
       .putDocument(
         validateCreateTodo(
           params,
@@ -65,10 +66,10 @@ const createTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance
     escriba.info(methodPath, {
       action: 'TASK_CREATED',
       method: methodPath,
-      data: { documentInserted }
+      data: { ...result }
     })
 
-    return documentInserted
+    return { ...result.value }
   } catch (error) {
     return throwCustomError(error, methodPath, EClassError.INTERNAL)
   }
@@ -79,7 +80,7 @@ const createTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance
  * @function
  * @throws {CustomError}
  * @param {EscribaLogger} escriba instance of escriba
- * @param {DynamoRepositoryInstance<Todo>} repository state-machine database methods
+ * @param {DynamoRepositoryInstance<Todo>} repository Dynamo database methods
  */
 const updateTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance<Todo>) => async (id: string, params: MutateTodoInput, user: string): Promise<Todo> => {
   const methodPath = 'adapters.todo.updateTodo'
@@ -100,7 +101,7 @@ const updateTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance
         updatedAt = :updatedAt
     `
     // send report to existing todo previous created
-    const task = await repository.updateDocument(
+    const result = await repository.updateDocument(
       { id },
       UpdateExpression,
       ExpressionAttributeValues
@@ -110,13 +111,13 @@ const updateTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance
     escriba.info(methodPath, {
       action: 'TASK_UPDATED',
       method: methodPath,
-      data: task
+      data: result
     })
 
     // return updated item
     return {
       ...currObject,
-      ...task
+      ...result.value
     }
   } catch (error) {
     return throwCustomError(error, methodPath, EClassError.INTERNAL)
@@ -128,22 +129,34 @@ const updateTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance
  * @function
  * @throws {CustomError}
  * @param {EscribaLogger} escriba instance of escriba
- * @param {DynamoRepositoryInstance<Todo>} repository state-machine database methods
+ * @param {DynamoRepositoryInstance<Todo>} repository Dynamo database methods
  */
 const deleteTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance<Todo>) => async (id: string, user: string) => {
   const methodPath = 'adapters.todo.deleteTodo'
   try {
-    const currObject = validateDeleteTodo(await getTodo(repository)(id), user)
-    await repository.deleteDocument({ id })
+    const currentObj = await getTodo(repository)(id)
+
+    if (!currentObj) {
+      return throwCustomError(new Error('no data for this id'), methodPath, EClassError.USER_ERROR)
+    }
+
+    const todo = validateDeleteTodo(currentObj, user)
+
+    const result = await repository.deleteDocument({ id })
 
     // log report data
     escriba.info(methodPath, {
       action: 'TASK_DELETED',
       method: methodPath,
-      data: currObject
+      data: {
+        ...result,
+        value: {
+          ...todo
+        }
+      }
     })
 
-    return currObject
+    return todo
   } catch (error) {
     return throwCustomError(error, methodPath, EClassError.INTERNAL)
   }
