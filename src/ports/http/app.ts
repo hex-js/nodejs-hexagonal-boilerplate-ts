@@ -1,11 +1,11 @@
-import express, { json as expressJson, urlencoded as expressUrlEncoded } from 'express'
-import { config as AWSConfig, DynamoDB } from 'aws-sdk'
-import { databaseRepository } from '@ports/state-machines'
 import { adapter } from '@adapters'
 import { appConfig, AWSDynamoConfig } from '@config'
-import { getRoutes } from './routes'
-import { handleLogger } from '@ports/logger'
 import { Todo } from '@models'
+import { databaseRepository } from '@ports/aws-dynamo'
+import { handleLogger } from '@ports/logger'
+import { config as AWSConfig, DynamoDB } from 'aws-sdk'
+import express, { json as expressJson, urlencoded as expressUrlEncoded } from 'express'
+import { getRoutes } from './routes'
 
 // setting app
 const app = express()

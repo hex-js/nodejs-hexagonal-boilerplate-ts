@@ -3,7 +3,7 @@ import { Request } from 'express'
 import { EscribaLogger } from '@ports/logger'
 import { AdapterFacade } from '@adapters'
 import { Todo } from '@models'
-import { CustomError, EClassError, throwCustomError } from '@utils'
+import { EClassError, throwCustomError } from '@utils'
 
 /**
  * @description Get Task by id
@@ -21,7 +21,7 @@ export const getTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => async
      */
     const todo = await adapter.todo.getTodo(req.params.id)
     if (R.isNil(todo)) {
-      throw new CustomError(new Error('id not found'), methodPath, EClassError.USER_ERROR)
+      return throwCustomError(new Error('id not found'), methodPath, EClassError.USER_ERROR)
     }
     return todo
   } catch (error) {

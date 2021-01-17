@@ -1,8 +1,8 @@
 import app from './app'
 import http from 'http'
-import debug from 'debug'
+import debugLib from 'debug'
 
-const dbgger = debug('api-server')
+const debug = debugLib('api-server')
 
 /**
  * @description Get the start message default with the port.
@@ -24,7 +24,7 @@ const startMessageDefault = (port: number | string | false): string => {
 const onListening = (): void => {
   const addr = server.address()
   const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr?.port
-  dbgger('Listening on ' + bind)
+  debug('Listening on ' + bind)
 }
 
 /**
@@ -33,32 +33,9 @@ const onListening = (): void => {
  * @memberof http
  * @param {string} value Port number as string type.
  */
-const normalizePort = (value: string) => {
+const normalizePort = (value: string): string | number | false => {
   const port = parseInt(value, 10)
   return isNaN(port) ? value : port >= 0 ? port : false
-}
-
-/**
- * Event listener for HTTP server "error" event.
- * @memberof http
- * @param {Error} error instantiated
- */
-const onError = (error: any) => {
-  if (error.syscall !== 'listen') throw error
-
-  const bind = `${typeof port === 'string' ? 'Pipe' : 'Port'} ${port}`
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges')
-      process.exit(1)
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use')
-      process.exit(1)
-    default:
-      throw error
-  }
 }
 
 /**
@@ -66,7 +43,9 @@ const onError = (error: any) => {
  * @memberof http
  */
 const port = normalizePort(process.env.PORT || '3000')
+// eslint-disable-next-line functional/no-expression-statement
 console.log(`${process.env.START_MESSAGE || startMessageDefault(port)}`)
+// eslint-disable-next-line functional/no-expression-statement
 app.set('port', port)
 
 /**
@@ -79,5 +58,4 @@ const server = http.createServer(app)
  * Listen on provided port, on all network interfaces.
  */
 server.listen(port)
-server.on('error', onError)
 server.on('listening', onListening)
