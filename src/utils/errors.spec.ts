@@ -1,11 +1,11 @@
-import { CustomError, EClassError, throwCustomError } from './errors'
+import { customErrorFactory, EClassError, throwCustomError } from './errors'
 
 describe('CustomError', () => {
   const methodPath = 'custom.path'
 
   test('basic instantiate', () => {
     const throwMessage = 'sample'
-    const err = new CustomError(new Error(throwMessage), methodPath, EClassError.INTERNAL)
+    const err = customErrorFactory(new Error(throwMessage), methodPath, EClassError.INTERNAL)
     expect(err.internalName).toBe(EClassError.INTERNAL)
     expect(err.message).toBe(throwMessage)
     expect(err.method).toBe(methodPath)
@@ -15,7 +15,7 @@ describe('CustomError', () => {
   test('instantiate without stack', () => {
     const throwMessage = 'sample'
     const errorName = 'MyError'
-    const err = new CustomError({ message: throwMessage, name: errorName }, methodPath, EClassError.INTERNAL)
+    const err = customErrorFactory({ message: throwMessage, name: errorName }, methodPath, EClassError.INTERNAL)
     expect(err.internalName).toBe(EClassError.INTERNAL)
     expect(err.message).toBe(throwMessage)
     expect(err.method).toBe(methodPath)
@@ -38,7 +38,7 @@ describe('throwCustomError', () => {
   jest.spyOn(toSpy, 'throwCustomError')
   test('basic call', () => {
     const throwMessage = 'sample'
-    const t = () => {
+    const t = (): void => {
       toSpy.throwCustomError(new Error(throwMessage), methodPath, EClassError.INTERNAL)
     }
     expect(t).toThrow()
@@ -47,8 +47,8 @@ describe('throwCustomError', () => {
 
   test('call from CustomError', () => {
     const throwMessage = 'sample'
-    const err = new CustomError(new Error(throwMessage), methodPath, EClassError.INTERNAL)
-    const t = () => {
+    const err = customErrorFactory(new Error(throwMessage), methodPath, EClassError.INTERNAL)
+    const t = (): void => {
       throwCustomError(err, 'doNotOverride', EClassError.USER_ERROR)
     }
     expect(t).toThrow()

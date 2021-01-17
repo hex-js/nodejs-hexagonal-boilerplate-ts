@@ -1,36 +1,39 @@
-export class CustomError extends Error {
-  readonly name: string
-  readonly message: string
-  readonly stack: string
-  readonly internalName: string
-  readonly method: string
-
-  /**
-   * Creates an instance of CustomError.
-   * @param {Error} err
-   * @param {string} methodPath
-   * @param {string} classError
-   * @memberof CustomError
-   */
-  constructor (err: Error, methodPath: string, classError: string) {
-    super()
-    const { name, message, stack } = err
-    this.name = name
-    this.message = message
-    this.stack = stack || ''
-    this.internalName = classError
-    this.method = methodPath
-  }
-}
+/* eslint-disable functional/no-throw-statement */
+/* eslint-disable functional/no-conditional-statement */
+import R from 'ramda'
 
 export enum EClassError {
   INTERNAL = 'INTERNAL',
   USER_ERROR = 'USER_ERROR'
 }
 
-export const throwCustomError = (error: Error, methodPath: string, classError: string) => {
-  if (error instanceof CustomError) {
+export type CustomError = {
+  readonly name: string
+  readonly message: string
+  readonly stack?: string
+  readonly internalName: EClassError
+  readonly method: string
+}
+
+const isCustomErrorInstance = (value?: any): value is CustomError => R.not(R.isNil(value)) &&
+  typeof R.prop('name', value) === 'string' &&
+  typeof R.prop('message', value) === 'string' &&
+  (R.isNil(R.prop('stack', value)) || typeof R.prop('stack', value) === 'string') &&
+  typeof R.prop('internalName', value) === 'string' &&
+  typeof R.prop('method', value) === 'string'
+
+export const customErrorFactory = (error: Error, methodPath: string, classError: EClassError): CustomError => ({
+  name: error.name,
+  message: error.message,
+  stack: error.stack,
+  internalName: classError,
+  method: methodPath
+})
+
+export const throwCustomError = <E extends Error>(error: E, methodPath: string, classError: EClassError): never => {
+  if (isCustomErrorInstance(error)) {
     throw error
   }
-  throw new CustomError(error, methodPath, classError)
+
+  throw customErrorFactory(error, methodPath, classError)
 }
