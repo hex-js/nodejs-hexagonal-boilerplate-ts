@@ -1,17 +1,23 @@
-import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { Todo } from '@models'
-import { databaseRepository } from './index'
-import { remapPrevixVariables } from './aws.dynamo'
-import { v4 as uuidv4 } from 'uuid'
-import { EClassError } from '@utils'
 import * as utils from '@utils'
+import { EClassError, throwCustomError } from '@utils/errors'
+import { DynamoDB } from 'aws-sdk'
+import { v4 as uuidv4 } from 'uuid'
+import { remapPrefixVariables } from './aws.dynamo'
+import { databaseRepository } from './index'
 
 /**
  * jest invocation for aws-sdk
  */
-jest.mock('aws-sdk/clients/dynamodb')
+jest.mock('aws-sdk')
+jest.mock('../../utils/errors')
 
-const dynamo = new DocumentClient()
+; (throwCustomError as any).mockImplementation((error: Error) => {
+  // eslint-disable-next-line functional/no-throw-statement
+  throw error
+})
+
+const dynamo = new DynamoDB.DocumentClient()
 const tableName = 'mockTable'
 const repoInstance = databaseRepository<Todo>(dynamo, 'mockTable')
 
@@ -47,18 +53,19 @@ const dynamoMockObject = {
 
 describe('getDocument', () => {
   beforeEach(() => {
-    (DocumentClient as any).mockReset()
+    (DynamoDB.DocumentClient as any).mockReset()
   })
-  const methodPath = 'state-machines.aws.dynamo.getDocument'
+  const methodPath = 'ports.aws-dynamo.getDocument'
   test('default case', async () => {
     (dynamo.get as any).mockImplementationOnce((Params: any) => dynamoMockObject.get(Params)())
     const newId = uuidv4()
 
-    await expect(repoInstance.getDocument({ id: newId }))
-      .resolves.toMatchObject({
-        id: newId,
-        description: 'mockResult'
-      })
+    const result = await repoInstance.getDocument({ id: newId })
+
+    expect(result.value).toMatchObject({
+      id: newId,
+      description: 'mockResult'
+    })
     expect(dynamo.get).toHaveBeenCalled()
     expect(dynamo.get).toHaveBeenCalledWith({ Key: { id: newId }, TableName: tableName })
   })
@@ -70,7 +77,7 @@ describe('getDocument', () => {
       promise: jest.fn().mockRejectedValue(new Error(throwMessage))
     }))
     const newId = uuidv4()
-    await expect(repoInstance.getDocument({ id: newId })).rejects.toThrow(throwMessage)
+    await expect(repoInstance.getDocument({ id: newId })).rejects.toEqual(new Error(throwMessage))
     // throws correct message
     expect(spyFn).toHaveBeenCalledWith(new Error(throwMessage), methodPath, EClassError.INTERNAL)
     expect(dynamo.get).toHaveBeenCalled()
@@ -83,7 +90,9 @@ describe('getDocument', () => {
     }))
     const newId = uuidv4()
 
-    await expect(repoInstance.getDocument({ id: newId })).resolves.toBe(null)
+    const result = await repoInstance.getDocument({ id: newId })
+
+    expect(result.value).toBe(null)
     expect(dynamo.get).toHaveBeenCalled()
     expect(dynamo.get).toHaveBeenCalledWith({ Key: { id: newId }, TableName: tableName })
   })
@@ -94,7 +103,9 @@ describe('getDocument', () => {
     }))
     const newId = uuidv4()
 
-    await expect(repoInstance.getDocument({ id: newId })).resolves.toBe(null)
+    const result = await repoInstance.getDocument({ id: newId })
+
+    expect(result.value).toBeNull()
     expect(dynamo.get).toHaveBeenCalled()
     expect(dynamo.get).toHaveBeenCalledWith({ Key: { id: newId }, TableName: tableName })
   })
@@ -102,21 +113,22 @@ describe('getDocument', () => {
 
 describe('putDocument', () => {
   beforeEach(() => {
-    (DocumentClient as any).mockReset()
+    (DynamoDB.DocumentClient as any).mockReset()
   })
-  const methodPath = 'state-machines.aws.dynamo.putDocument'
+  const methodPath = 'ports.aws-dynamo.putDocument'
   test('default case', async () => {
     (dynamo.put as any).mockImplementationOnce((Params: any) => dynamoMockObject.put(Params)())
     const newId = uuidv4()
 
-    await expect(repoInstance.putDocument({
+    const result = await repoInstance.putDocument({
       id: newId,
       description: 'mockResult'
-    }))
-      .resolves.toMatchObject({
-        id: newId,
-        description: 'mockResult'
-      })
+    })
+
+    await expect(result.value).toMatchObject({
+      id: newId,
+      description: 'mockResult'
+    })
     expect(dynamo.put).toHaveBeenCalled()
     expect(dynamo.put).toHaveBeenCalledWith({
       Item: {
@@ -138,7 +150,7 @@ describe('putDocument', () => {
     await expect(repoInstance.putDocument({
       id: newId,
       description: 'mockResult'
-    })).rejects.toThrow(throwMessage)
+    })).rejects.toEqual(new Error(throwMessage))
     // throws correct message
     expect(spyFn).toHaveBeenCalledWith(new Error(throwMessage), methodPath, EClassError.INTERNAL)
     expect(dynamo.put).toHaveBeenCalled()
@@ -154,30 +166,31 @@ describe('putDocument', () => {
 
 describe('updateDocument', () => {
   beforeEach(() => {
-    (DocumentClient as any).mockReset()
+    (DynamoDB.DocumentClient as any).mockReset()
   })
-  const methodPath = 'state-machines.aws.dynamo.updateDocument'
+  const methodPath = 'ports.aws-dynamo.updateDocument'
   test('default case', async () => {
     (dynamo.update as any).mockImplementationOnce((Params: any) => dynamoMockObject.update(Params)())
     const id = uuidv4()
 
-    await expect(repoInstance.updateDocument(
+    const result = await repoInstance.updateDocument(
       {
         id
       },
       'description := :description',
       { description: 'mockResult' }
-    ))
-      .resolves.toMatchObject({
-        id,
-        description: 'mockResult'
-      })
+    )
+
+    expect(result.value).toMatchObject({
+      id,
+      description: 'mockResult'
+    })
     expect(dynamo.update).toHaveBeenCalled()
     expect(dynamo.update).toHaveBeenCalledWith({
       Key: { id },
       TableName: tableName,
       UpdateExpression: 'description := :description',
-      ExpressionAttributeValues: remapPrevixVariables({ description: 'mockResult' }),
+      ExpressionAttributeValues: remapPrefixVariables({ description: 'mockResult' }),
       ReturnValues: 'ALL_NEW'
     })
   })
@@ -188,13 +201,15 @@ describe('updateDocument', () => {
     }))
     const id = uuidv4()
 
-    await expect(repoInstance.updateDocument(
+    const result = await repoInstance.updateDocument(
       {
         id
       },
       'description := :description',
       { description: 'mockAttributes' }
-    )).resolves.toEqual({})
+    )
+
+    expect(result.value).toEqual({})
   })
 
   test('error', async () => {
@@ -211,7 +226,7 @@ describe('updateDocument', () => {
       },
       'description := :description',
       { description: 'mockResult' }
-    )).rejects.toThrow(throwMessage)
+    )).rejects.toEqual(new Error(throwMessage))
     // throws correct message
     expect(spyFn).toHaveBeenCalledWith(new Error(throwMessage), methodPath, EClassError.INTERNAL)
     expect(dynamo.update).toHaveBeenCalled()
@@ -219,7 +234,7 @@ describe('updateDocument', () => {
       Key: { id: newId },
       TableName: tableName,
       UpdateExpression: 'description := :description',
-      ExpressionAttributeValues: remapPrevixVariables({ description: 'mockResult' }),
+      ExpressionAttributeValues: remapPrefixVariables({ description: 'mockResult' }),
       ReturnValues: 'ALL_NEW'
     })
   })
@@ -227,15 +242,16 @@ describe('updateDocument', () => {
 
 describe('deleteDocument', () => {
   beforeEach(() => {
-    (DocumentClient as any).mockReset()
+    (DynamoDB.DocumentClient as any).mockReset()
   })
-  const methodPath = 'state-machines.aws.dynamo.deleteDocument'
+  const methodPath = 'ports.aws-dynamo.deleteDocument'
   test('default case', async () => {
     (dynamo.delete as any).mockImplementationOnce((Params: any) => dynamoMockObject.delete(Params)())
     const newId = uuidv4()
 
-    await expect(repoInstance.deleteDocument({ id: newId }))
-      .resolves.toBeUndefined()
+    const result = await repoInstance.deleteDocument({ id: newId })
+
+    expect(result.value).toBeNull()
     expect(dynamo.delete).toHaveBeenCalled()
     expect(dynamo.delete).toHaveBeenCalledWith({ Key: { id: newId }, TableName: tableName })
   })
@@ -258,12 +274,12 @@ describe('deleteDocument', () => {
 
 describe('remapPrevixVariables', () => {
   test('default case', () => {
-    const remmaped = remapPrevixVariables({ a: 'a' })
+    const remmaped = remapPrefixVariables({ a: 'a' })
     expect(remmaped).toMatchObject({ ':a': 'a' })
   })
 
   test('empty', () => {
-    const remmaped = remapPrevixVariables({})
+    const remmaped = remapPrefixVariables({})
     expect(remmaped).toMatchObject({})
   })
 })
