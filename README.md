@@ -82,12 +82,12 @@ Na integração contínua o localstack é amigável para manter o mesmo ambiente
 
 ![diagrama](./diagram.png)
 
-### Como usar esse projeto
+## Como usar esse projeto
 
 É bem simples de já começar rodando
 
 1. configure o `.env` baseado no `.env.localstack`;
-2. ligue o localstack com `docker-compose up -d`;
+2. ligue o localstack com `docker-compose --env-file=.env.localstack up -d` (ou no MacOS `docker-compose -f docker-compose-macos.yml --env-file=.env.localstack up -d`);
 3. levante o ambiente demo usando [terraform](https://www.terraform.io/) com os comandos:
 ```bash
 $terraform init
@@ -102,6 +102,6 @@ Irá levantar uma instância de serviço http(Express), e seja feliz no consumo
 
 ## Features desse boilerplate
 
-1. localstack como ambiente de simulação; e
-2. TypeScript que te ajudam a manter o código com tipagem razoável.
-3. Linters que te ajudam a manter o código funcional e puro.
+1. localstack como ambiente de simulação;
+2. TypeScript que te ajudam a manter o código com tipagem razoável;
+3. Linters que te ajudam a manter o código funcional e puro;

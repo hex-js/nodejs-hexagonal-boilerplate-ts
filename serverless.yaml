@@ -10,7 +10,7 @@ plugins:
 custom:
   dotenv:
     # dot env to serve environment variables in files
-    path: .env.dev
+    path: .env
     logging: false
   localstack:
     # localstack environment
@@ -48,10 +48,10 @@ provider:
   name: aws
   runtime: nodejs12.x
 functions:
-  todo: # A Function
+  todos: # A Function
     handler: dist/ports/aws-lambda/todo.handler # The file and module for this specific function.
     name: todo # optional, Deployed Lambda name
-    description: todo # The description of your function.
+    description: todo handler # The description of your function.
     runtime: nodejs12.x # Runtime for this specific function. Overrides the default which is set on the provider level
     timeout: 20 # optional, in seconds, default is 6, we recomend 10 seconds for local environment
     package:
