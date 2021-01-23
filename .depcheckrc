@@ -3,6 +3,7 @@ ignores: [
   "@commitlint/config-conventional",
   "@types/jest",
   "commitlint",
+  "aws-lambda",
   "eslint-config-standard-with-typescript",
   "jest-junit",
   "prettier-eslint",
