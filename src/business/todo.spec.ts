@@ -27,7 +27,7 @@ describe('validateCreateTodo', () => {
   }
 
   test('validate invalid taskPriority', () => {
-    const throwMessage = `invalid value for priority: got ${validateCasePriorityInvalid.taskPriority}`
+    const throwMessage = '"taskPriority" must be one of [LOW, MODERATE, HIGH, URGENT]'
     const spyFn = jest.spyOn(utils, 'throwCustomError')
     expect(() => {
       validateCreateTodo(validateCasePriorityInvalid, 'testUser')
@@ -41,7 +41,7 @@ describe('validateCreateTodo', () => {
   }
 
   test('validate null description on create', () => {
-    const throwMessage = 'invalid entry on field data, missing information about taskDescription'
+    const throwMessage = '"taskDescription" is required'
     const spyFn = jest.spyOn(utils, 'throwCustomError')
     expect(() => {
       validateCreateTodo(validateNullDescription, 'testUser')
@@ -119,6 +119,19 @@ describe('validateUpdateTodo', () => {
     const spyFn = jest.spyOn(utils, 'throwCustomError')
     expect(() => {
       validateUpdateTodo({ notValid: true } as any, defaultOriginalData, 'testUser')
+    }).toThrow(throwMessage)
+    // throws correct message
+    expect(spyFn).toHaveBeenCalledWith(new Error(throwMessage), methodPath, EClassError.USER_ERROR)
+  })
+
+  test('validate data when is invalid field data', () => {
+    const throwMessage = '"taskOrder" must be greater than or equal to 0'
+    const spyFn = jest.spyOn(utils, 'throwCustomError')
+    const updateTodo = {
+      taskOrder: -1
+    }
+    expect(() => {
+      validateUpdateTodo(updateTodo, defaultOriginalData, 'testUser')
     }).toThrow(throwMessage)
     // throws correct message
     expect(spyFn).toHaveBeenCalledWith(new Error(throwMessage), methodPath, EClassError.USER_ERROR)

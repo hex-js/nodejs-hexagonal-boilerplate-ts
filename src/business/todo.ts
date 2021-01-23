@@ -1,8 +1,31 @@
-import { v4 as uuidv4 } from 'uuid'
-import { toISOString } from './moment'
-import { CreateTodoInput, ETodoStatus, EPriority, MutateTodoInput, MutateTodoOutput, Todo } from '../models'
-import R from 'ramda'
 import { EClassError, throwCustomError } from '@utils'
+import Joi from 'joi'
+import R from 'ramda'
+import { v4 as uuidv4 } from 'uuid'
+import { CreateTodoInput, EPriority, ETodoStatus, MutateTodoInput, MutateTodoOutput, Todo } from '../models'
+import { toISOString } from './moment'
+
+const todoSchema = Joi.object<Todo>({
+  taskOrder: Joi
+    .number()
+    .integer()
+    .min(0),
+  taskDescription: Joi
+    .string()
+    .required(),
+  taskOwner: Joi
+    .string()
+    .required(),
+  taskPriority: Joi
+    .string()
+    .valid('LOW', 'MODERATE', 'HIGH', 'URGENT'),
+  taskStatus: Joi
+    .string()
+    .valid('NEW', 'IN_PROGRESS', 'WAITING_TRANSMISSION', 'CLOSED', 'CANCELED'),
+  id: Joi.string().required(),
+  createdAt: Joi.string().isoDate(),
+  updatedAt: Joi.string().isoDate()
+})
 
 /**
  * @description Validate a Todo event on creation
@@ -20,19 +43,11 @@ export const validateCreateTodo = (data?: CreateTodoInput, owner?: string): Todo
     return throwCustomError(new Error('invalid entry on field data, missing information'), methodPath, EClassError.USER_ERROR)
   }
 
-  if (R.isEmpty(data.taskDescription) || R.isNil(data.taskDescription)) {
-    return throwCustomError(new Error('invalid entry on field data, missing information about taskDescription'), methodPath, EClassError.USER_ERROR)
-  }
-
   if (R.isNil(owner)) {
     return throwCustomError(new Error('owner is missing'), methodPath, EClassError.USER_ERROR)
   }
 
-  if (typeof data.taskPriority !== 'undefined' && R.not(Object.values(EPriority).includes(data.taskPriority))) {
-    return throwCustomError(new Error(`invalid value for priority: got ${data.taskPriority}`), methodPath, EClassError.USER_ERROR)
-  }
-
-  return {
+  const todo: Todo = {
     // default values if is missing
     taskOrder: 0,
     taskPriority: EPriority.LOW,
@@ -44,6 +59,14 @@ export const validateCreateTodo = (data?: CreateTodoInput, owner?: string): Todo
     updatedAt,
     id: uuidv4()
   }
+
+  const validation = todoSchema.validate(todo)
+
+  if (validation.error) {
+    return throwCustomError(validation.error, methodPath, EClassError.USER_ERROR)
+  }
+
+  return todo
 }
 
 /**
@@ -71,14 +94,22 @@ export const validateUpdateTodo = (data?: MutateTodoInput | null, originalData?:
     return throwCustomError(new Error('owner is missing'), methodPath, EClassError.USER_ERROR)
   }
 
+  const todo: Todo = {
+    ...originalData,
+    ...data,
+    updatedAt
+  }
+
+  const validation = todoSchema.validate(todo)
+
+  if (validation.error) {
+    return throwCustomError(validation.error, methodPath, EClassError.USER_ERROR)
+  }
+
   return ['taskOwner', 'id', 'createdAt']
     .reduce(
       (reducedData, field) => R.dissoc(field, reducedData),
-      {
-        ...originalData,
-        ...data,
-        updatedAt
-      }
+      todo
     )
 }
 
