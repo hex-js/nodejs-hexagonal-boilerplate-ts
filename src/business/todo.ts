@@ -18,10 +18,10 @@ const todoSchema = Joi.object<Todo>({
     .required(),
   taskPriority: Joi
     .string()
-    .valid('LOW', 'MODERATE', 'HIGH', 'URGENT'),
+    .valid(...Object.values(EPriority)),
   taskStatus: Joi
     .string()
-    .valid('NEW', 'IN_PROGRESS', 'WAITING_TRANSMISSION', 'CLOSED', 'CANCELED'),
+    .valid(...Object.values(ETodoStatus)),
   id: Joi.string().required(),
   createdAt: Joi.string().isoDate(),
   updatedAt: Joi.string().isoDate()
