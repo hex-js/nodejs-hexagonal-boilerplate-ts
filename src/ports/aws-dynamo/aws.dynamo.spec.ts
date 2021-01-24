@@ -27,17 +27,28 @@ const dynamoMockObject = {
       Item: {
         id: Params.Key.id,
         description: 'mockResult'
+      },
+      $response: {
+        requestId: uuidv4()
       }
     })
   }),
   put: (Params: any) => jest.fn().mockReturnValue({
-    promise: jest.fn().mockResolvedValue(Params.Item)
+    promise: jest.fn().mockResolvedValue({
+      Item: Params.Item,
+      $response: {
+        requestId: uuidv4()
+      }
+    })
   }),
   update: (Params: any) => jest.fn().mockReturnValue({
     promise: jest.fn().mockResolvedValue({
       Attributes: {
         id: Params.Key.id,
         description: 'mockResult'
+      },
+      $response: {
+        requestId: uuidv4()
       }
     })
   }),
@@ -46,6 +57,9 @@ const dynamoMockObject = {
       Item: {
         id: Params.Key.id,
         description: 'mockResult'
+      },
+      $response: {
+        requestId: uuidv4()
       }
     })
   })
@@ -86,7 +100,7 @@ describe('getDocument', () => {
 
   test('null result.Item', async () => {
     (dynamo.get as any).mockImplementationOnce(jest.fn().mockReturnValue({
-      promise: jest.fn().mockResolvedValue({ Item: null })
+      promise: jest.fn().mockResolvedValue({ Item: null, $response: { requestId: uuidv4() } })
     }))
     const newId = uuidv4()
 
@@ -99,7 +113,7 @@ describe('getDocument', () => {
 
   test('undefined result.Item', async () => {
     (dynamo.get as any).mockImplementationOnce(jest.fn().mockReturnValue({
-      promise: jest.fn().mockResolvedValue({ Item: undefined })
+      promise: jest.fn().mockResolvedValue({ Item: undefined, $response: { requestId: uuidv4() } })
     }))
     const newId = uuidv4()
 
@@ -197,7 +211,7 @@ describe('updateDocument', () => {
 
   test('undefined result.Attributes', async () => {
     (dynamo.update as any).mockImplementationOnce(jest.fn().mockReturnValue({
-      promise: jest.fn().mockResolvedValue({ Attributes: undefined })
+      promise: jest.fn().mockResolvedValue({ Attributes: undefined, $response: { requestId: uuidv4() } })
     }))
     const id = uuidv4()
 

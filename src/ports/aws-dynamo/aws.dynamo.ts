@@ -6,6 +6,7 @@ import R from 'ramda'
 export type DynamoResult<T, U> = {
   readonly operationResult: PromiseResult<U, AWSError>
   readonly value: T
+  readonly requestId: string
 }
 
 /**
@@ -22,10 +23,12 @@ export const getDocument = <T>(dynamo: DynamoDB.DocumentClient, tableName: strin
 
     const operationResult = await dynamo.get(params).promise()
     const value = R.not(R.isNil(operationResult.Item)) ? { ...operationResult.Item } as T : null
+    const requestId = operationResult.$response.requestId
 
     return {
       operationResult,
-      value
+      value,
+      requestId
     }
   } catch (error) {
     return throwCustomError(error, 'ports.aws-dynamo.getDocument', EClassError.INTERNAL)
@@ -48,10 +51,12 @@ export const putDocument = <T>(dynamo: DynamoDB.DocumentClient, tableName: strin
 
     const operationResult = await dynamo.put(params).promise()
     const value = { ...item } as T
+    const requestId = operationResult.$response.requestId
 
     return {
       operationResult,
-      value
+      value,
+      requestId
     }
   } catch (error) {
     return throwCustomError(error, 'ports.aws-dynamo.putDocument', EClassError.INTERNAL)
@@ -75,10 +80,12 @@ export const updateDocument = <T>(dynamo: DynamoDB.DocumentClient, tableName: st
 
     const operationResult = await dynamo.update(params).promise()
     const value = { ...operationResult.Attributes } as Partial<T>
+    const requestId = operationResult.$response.requestId
 
     return {
       operationResult,
-      value
+      value,
+      requestId
     }
   } catch (error) {
     return throwCustomError(error, 'ports.aws-dynamo.updateDocument', EClassError.INTERNAL)
@@ -99,10 +106,12 @@ export const deleteDocument = (dynamo: DynamoDB.DocumentClient, tableName: strin
 
     const operationResult = await dynamo.delete(params).promise()
     const value = null
+    const requestId = operationResult.$response.requestId
 
     return {
       operationResult,
-      value
+      value,
+      requestId
     }
   } catch (error) {
     return throwCustomError(error, 'ports.aws-dynamo.deleteDocument', EClassError.INTERNAL)

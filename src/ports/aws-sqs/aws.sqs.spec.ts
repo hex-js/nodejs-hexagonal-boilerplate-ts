@@ -41,7 +41,10 @@ const sqsMockObject = {
       MD5OfMessageAttributes: toMD5(randomString()),
       MD5OfMessageSystemAttributes: toMD5(randomString()),
       MessageId: uuidv4(),
-      SequenceNumber: 123
+      SequenceNumber: 123,
+      $response: {
+        requestId: uuidv4()
+      }
     })
   }),
   deleteMessage: jest.fn().mockReturnValue({
@@ -64,7 +67,10 @@ const sqsMockObject = {
         }),
         Attributes: randomString(),
         MD5OfMessageAttributes: toMD5(randomString())
-      }]
+      }],
+      $response: {
+        requestId: uuidv4()
+      }
     })
   })
 }
@@ -108,6 +114,9 @@ describe('sendMessage', () => {
     const sqsMockObjectWithOutId = {
       sendMessage: jest.fn().mockReturnValue({
         promise: jest.fn().mockResolvedValue({
+          $response: {
+            requestId: uuidv4()
+          }
         })
       })
     }
@@ -227,7 +236,10 @@ describe('receiveMessage', () => {
             Body: undefined,
             Attributes: randomString(),
             MD5OfMessageAttributes: toMD5(randomString())
-          }]
+          }],
+          $response: {
+            requestId: uuidv4()
+          }
         })
       })
     }))
@@ -288,7 +300,10 @@ describe('receiveMessage', () => {
     const sqsMockObjectEmpty = {
       receiveMessage: jest.fn().mockReturnValue({
         promise: jest.fn().mockResolvedValue({
-          Messages: []
+          Messages: [],
+          $response: {
+            requestId: uuidv4()
+          }
         })
       })
     }
