@@ -6,10 +6,10 @@ import { getEnv } from './environments'
  * @memberof config
  */
 const AWSConfig = {
-  accessKeyId: getEnv('AWS_ACCESS_KEY_ID'),
-  secretAccessKey: getEnv('AWS_ACCESS_SECRET_KEY'),
-  region: getEnv('AWS_REGION'),
-  profile: getEnv('AWS_PROFILE')
+  accessKeyId: getEnv('AWS_ACCESS_KEY_ID', 'dummy'),
+  secretAccessKey: getEnv('AWS_ACCESS_SECRET_KEY', 'dummy'),
+  region: getEnv('AWS_REGION', 'us-east-1'),
+  profile: getEnv('AWS_PROFILE', 'localstack')
 }
 
 /**
@@ -19,9 +19,9 @@ const AWSConfig = {
 const AWSDynamoConfig = R.merge(
   AWSConfig,
   {
-    region: getEnv('AWS_DYNAMO_REGION'),
+    region: getEnv('AWS_DYNAMO_REGION', 'us-east-1'),
     apiVersion: getEnv('AWS_DYNAMO_API_VERSION', '2012-08-10'),
-    endpoint: getEnv('AWS_DYNAMO_ENDPOINT')
+    endpoint: getEnv('AWS_DYNAMO_ENDPOINT', 'http://localhost:4566')
   }
 )
 
@@ -32,7 +32,7 @@ const AWSDynamoConfig = R.merge(
 const AWSSqsConfig = R.merge(
   AWSConfig,
   {
-    region: getEnv('AWS_SQS_REGION', 'us-west-2'),
+    region: getEnv('AWS_SQS_REGION', 'us-east-1'),
     apiVersion: getEnv('AWS_SQS_API_VERSION', '2012-11-05')
   }
 )
@@ -44,7 +44,7 @@ const AWSSqsConfig = R.merge(
 const AWSS3Config = R.merge(
   AWSConfig,
   {
-    region: getEnv('AWS_SQS_REGION', 'us-west-2'),
+    region: getEnv('AWS_SQS_REGION', 'us-east-1'),
     apiVersion: getEnv('AWS_S3_API_VERSION', '2006-03-01')
   }
 )
@@ -66,7 +66,7 @@ const envProdName = 'production'
 const appConfig = {
   appName: getEnv('APP_NAME', 'hexagonal-boilerplate'),
   isProduction: getEnv('NODE_ENV') === envProdName,
-  envName: getEnv('NODE_ENV'),
+  envName: getEnv('NODE_ENV', 'development'),
   todo: {
     tableName: getEnv('AWS_DYNAMO_TODO_TABLE_NAME', 'todos'),
     queueUrl: getEnv('AWS_SQS_TODO_QUEUE_NAME', 'todo')
@@ -77,34 +77,7 @@ const appConfig = {
  * logger configuration fixed for all jobs
  * @memberof config
  */
-const escribaConf = {
-  sensitiveConf: {
-    password: {
-      paths: ['message.password'],
-      pattern: /\w.*/g,
-      replacer: '*'
-    }
-  },
-  log4jsConf: {
-    appenders: {
-      out: {
-        type: 'console',
-        layout: {
-          type: 'pattern',
-          pattern: '[%d] %m'
-        }
-      }
-    },
-    categories: {
-      default: {
-        appenders: [
-          'out'
-        ],
-        level: 'info'
-      }
-    }
-  }
-}
+const loggerConf = {}
 
 export {
   appConfig,
@@ -112,7 +85,7 @@ export {
   AWSDynamoConfig,
   AWSS3Config,
   AWSSqsConfig,
-  escribaConf,
+  loggerConf,
   envProdName,
   momentConfig
 }
