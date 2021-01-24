@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { response } from './utils'
-import { EscribaLogger } from '@ports/logger'
+import { LoggerInstance } from '@ports/logger'
 import controllers from '@ports/http/controllers'
 
 const router = Router()
@@ -9,16 +9,16 @@ const router = Router()
  * @description Define the index routes.
  *
  * @function
- * @param {EscribaLogger} escriba instance of escriba
+ * @param {LoggerInstance} logger instance of logger
  * @param {AdapterFacade} adapter instantiated adapter
  * @returns {Router}
  */
 
-export const indexRouter = (escriba: EscribaLogger): Router => {
+export const indexRouter = (logger: LoggerInstance): Router => {
   /**
    * ping
    */
-  router.all('/ping', (_, res) => response(controllers.index.ping(escriba)(), res))
+  router.all('/ping', (_, res) => response(controllers.index.ping(logger)(), res))
 
   return router
 }

@@ -9,8 +9,8 @@ import { getRoutes } from './routes'
 
 // setting app
 const app = express()
-// Escriba
-const escriba = handleLogger(appConfig.appName, appConfig.envName)
+// logger
+const logger = handleLogger(appConfig.appName, appConfig.envName)
 
 // AWS Dynamo configuration.
 AWSConfig.update(AWSDynamoConfig)
@@ -18,13 +18,13 @@ const dynamo = new DynamoDB.DocumentClient()
 
 // inject repositories
 const databaseRepoInstance = databaseRepository<Todo>(dynamo, appConfig.todo.tableName)
-const adapterInstance = adapter(escriba, databaseRepoInstance)
+const adapterInstance = adapter(logger, databaseRepoInstance)
 
 app.use(expressJson({ limit: '50mb' }))
 app.use(expressUrlEncoded({ extended: false }))
 
 // Routes
-const routes = getRoutes(escriba, adapterInstance)
+const routes = getRoutes(logger, adapterInstance)
 app.use('/api/v1', routes.index)
 app.use('/api/v1/todos', routes.todo)
 

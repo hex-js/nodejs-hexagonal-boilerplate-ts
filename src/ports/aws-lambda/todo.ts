@@ -24,8 +24,8 @@ export const handler = async (event: AppSyncResolverEvent<any> & { readonly fiel
   const isProduction = process.env.ENV_NAME === 'production'
   const envName = isProduction ? 'production' : 'staging'
 
-  // Escriba configuration.
-  const escriba = handleLogger(appName, envName)
+  // Logger configuration.
+  const logger = handleLogger(appName, envName)
 
   // AWS Dynamo configuration.
   AWS.config.update(AWSDynamoConfig)
@@ -33,16 +33,16 @@ export const handler = async (event: AppSyncResolverEvent<any> & { readonly fiel
 
   // inject repositories
   const databaseRepoInstance = databaseRepository<Todo>(dynamo, appConfig.todo.tableName)
-  const adapterInstance = adapter(escriba, databaseRepoInstance)
+  const adapterInstance = adapter(logger, databaseRepoInstance)
 
   const getTodo = async (): Promise<Todo | null> => {
     try {
       const { id } = event.arguments
       const result = await adapterInstance.todo.getTodo(id)
-      escriba.info('handler.get', `Get the task: ${id}`)
+      logger.info('handler.get', `Get the task: ${id}`)
       return result
     } catch (error) {
-      escriba.error('handler.generate', { ...error })
+      logger.error('handler.generate', { ...error })
       return throwCustomError(error, 'ports.aws-lambda.todo.getTodo', EClassError.INTERNAL)
     }
   }
@@ -51,10 +51,10 @@ export const handler = async (event: AppSyncResolverEvent<any> & { readonly fiel
     try {
       const { user } = event.arguments
       const result = await adapterInstance.todo.createTodo(event.arguments.data, user)
-      escriba.info('handler.generate', `Generated the task: ${result.id}`)
+      logger.info('handler.generate', `Generated the task: ${result.id}`)
       return result
     } catch (error) {
-      escriba.error('handler.generate', { ...error })
+      logger.error('handler.generate', { ...error })
       return throwCustomError(error, 'ports.aws-lambda.todo.createTodo', EClassError.INTERNAL)
     }
   }
@@ -63,10 +63,10 @@ export const handler = async (event: AppSyncResolverEvent<any> & { readonly fiel
     try {
       const { id, user } = event.arguments
       const result = await adapterInstance.todo.updateTodo(id, event.arguments.data, user)
-      escriba.info('handler.generate', `Generated the task: ${result.id}`)
+      logger.info('handler.generate', `Generated the task: ${result.id}`)
       return result
     } catch (error) {
-      escriba.error('handler.generate', { ...error })
+      logger.error('handler.generate', { ...error })
       return throwCustomError(error, 'ports.aws-lambda.todo.updateTodo', EClassError.INTERNAL)
     }
   }
@@ -75,10 +75,10 @@ export const handler = async (event: AppSyncResolverEvent<any> & { readonly fiel
     try {
       const { id, user } = event.arguments
       const result = await adapterInstance.todo.deleteTodo(id, user)
-      escriba.info('handler.get', `Delete the task: ${id}`)
+      logger.info('handler.get', `Delete the task: ${id}`)
       return result
     } catch (error) {
-      escriba.error('handler.generate', { ...error })
+      logger.error('handler.generate', { ...error })
       return throwCustomError(error, 'ports.aws-lambda.todo.deleteTodo', EClassError.INTERNAL)
     }
   }
@@ -94,7 +94,7 @@ export const handler = async (event: AppSyncResolverEvent<any> & { readonly fiel
     return throwCustomError(new Error(`No resolver for ${event.field}`), 'ports.aws-lambda.todo', EClassError.INTERNAL)
   }
 
-  escriba.info('handler', `Function "${context.functionName}" running - ID: ${context.awsRequestId}`)
+  logger.info('handler', `Function "${context.functionName}" running - ID: ${context.awsRequestId}`)
 
   const output = await resolvers[event.field]()
 

@@ -1,6 +1,6 @@
 import R from 'ramda'
 import { Request } from 'express'
-import { EscribaLogger } from '@ports/logger'
+import { LoggerInstance } from '@ports/logger'
 import { AdapterFacade } from '@adapters'
 import { Todo } from '@models'
 import { EClassError, throwCustomError } from '@utils'
@@ -8,11 +8,11 @@ import { EClassError, throwCustomError } from '@utils'
 /**
  * @description Get Task by id
  *
- * @param {EscribaLogger} escriba instance of escriba
+ * @param {LoggerInstance} logger instance of logger
  * @param {AdapterFacade} adapter adapter instantiated
  * @returns {ControllerTodoReturn}
  */
-export const getTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => async (req: Request): Promise<Todo> => {
+export const getTodo = (logger: LoggerInstance, adapter: AdapterFacade) => async (req: Request): Promise<Todo> => {
   const methodPath = 'api.controllers.todo.getTodo'
   try {
     /**
@@ -25,7 +25,7 @@ export const getTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => async
     }
     return todo
   } catch (error) {
-    escriba.error(methodPath, error)
+    logger.error(methodPath, error)
     return throwCustomError(error, methodPath, EClassError.INTERNAL)
   }
 }
@@ -33,10 +33,10 @@ export const getTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => async
 /**
  * @description Create Task
  *
- * @param {EscribaLogger} escriba instance of escriba
+ * @param {LoggerInstance} logger instance of logger
  * @param {AdapterFacade} adapter adapter instantiated
  */
-export const createTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => async (req: Request) => {
+export const createTodo = (logger: LoggerInstance, adapter: AdapterFacade) => async (req: Request) => {
   const methodPath = 'api.controller.todo.createTodo'
   try {
     /**
@@ -50,7 +50,7 @@ export const createTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => as
     const todo = await adapter.todo.createTodo(req.body.data, req.body.user)
     return todo
   } catch (error) {
-    escriba.error(methodPath, error)
+    logger.error(methodPath, error)
     return throwCustomError(error, methodPath, EClassError.INTERNAL)
   }
 }
@@ -58,10 +58,10 @@ export const createTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => as
 /**
  * @description Update Task
  *
- * @param {EscribaLogger} escriba instance of escriba
+ * @param {LoggerInstance} logger instance of logger
  * @param {AdapterFacade} adapter adapter instantiated
  */
-export const updateTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => async (req: Request) => {
+export const updateTodo = (logger: LoggerInstance, adapter: AdapterFacade) => async (req: Request) => {
   const methodPath = 'api.controller.todo.updateTodo'
   try {
     /**
@@ -75,7 +75,7 @@ export const updateTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => as
     const todo = await adapter.todo.updateTodo(req.params.id, req.body.data, req.body.user)
     return todo
   } catch (error) {
-    escriba.error(methodPath, error)
+    logger.error(methodPath, error)
     return throwCustomError(error, methodPath, EClassError.INTERNAL)
   }
 }
@@ -83,10 +83,10 @@ export const updateTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => as
 /**
  * @description Delete Task
  *
- * @param {EscribaLogger} escriba instance of escriba
+ * @param {LoggerInstance} logger instance of logger
  * @param {AdapterFacade} adapter adapter instantiated
  */
-export const deleteTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => async (req: Request) => {
+export const deleteTodo = (logger: LoggerInstance, adapter: AdapterFacade) => async (req: Request) => {
   const methodPath = 'api.controller.todo.deleteTodo'
   try {
     /**
@@ -96,7 +96,7 @@ export const deleteTodo = (escriba: EscribaLogger, adapter: AdapterFacade) => as
     const todo = await adapter.todo.deleteTodo(req.params.id, req.body.user)
     return todo
   } catch (error) {
-    escriba.error(methodPath, error)
+    logger.error(methodPath, error)
     return throwCustomError(error, methodPath, EClassError.INTERNAL)
   }
 }
