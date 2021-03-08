@@ -1,4 +1,4 @@
-import { appConfig, AWSConfig, AWSDynamoConfig, AWSS3Config, AWSSqsConfig, envProdName, escribaConf, momentConfig } from './index'
+import { appConfig, AWSConfig, AWSDynamoConfig, AWSS3Config, AWSSqsConfig, envProdName, loggerConf, momentConfig } from './index'
 
 describe('config', () => {
   test('AWSConfig', () => {
@@ -36,27 +36,7 @@ describe('config', () => {
     expect(appConfig.todo).toHaveProperty('tableName', 'todos')
     expect(appConfig.todo).toHaveProperty('queueUrl', 'todo')
   })
-  test('escribaConf', () => {
-    expect(escribaConf).toHaveProperty('log4jsConf')
-    expect(escribaConf.log4jsConf).toHaveProperty('appenders')
-    expect(escribaConf.log4jsConf.appenders).toHaveProperty('out', {
-      type: 'console',
-      layout: {
-        type: 'pattern',
-        pattern: '[%d] %m'
-      }
-    })
-    expect(escribaConf.log4jsConf.categories).toHaveProperty('default', {
-      appenders: [
-        'out'
-      ],
-      level: 'info'
-    })
-    expect(escribaConf).toHaveProperty('sensitiveConf')
-    expect(escribaConf.sensitiveConf).toHaveProperty('password', {
-      paths: ['message.password'],
-      pattern: /\w.*/g,
-      replacer: '*'
-    })
+  test('loggerConf', () => {
+    expect(loggerConf).toBeDefined()
   })
 })

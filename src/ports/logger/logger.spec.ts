@@ -2,14 +2,14 @@ import { handleLogger } from './logger'
 
 const appName = 'test-logger-app'
 const envName = String(process.env.NODE_ENV)
-const escriba = handleLogger(appName, envName)
+const logger = handleLogger(appName, envName)
 
 describe('basic usage', () => {
   test('info', () => {
-    const spyFn = jest.spyOn(escriba.logger, 'info').mockImplementation()
+    const spyFn = jest.spyOn(logger.logger, 'info').mockImplementation()
     const method = 'basic.info'
     const message = 'baisc info message'
-    escriba.info(method, message)
+    logger.info(method, message)
 
     expect(spyFn).toBeCalledWith(message, expect.objectContaining({
       from: {
@@ -22,10 +22,10 @@ describe('basic usage', () => {
   })
 
   test('error', () => {
-    const spyFn = jest.spyOn(escriba.logger, 'info').mockImplementation()
+    const spyFn = jest.spyOn(logger.logger, 'info').mockImplementation()
     const method = 'basic.error'
     const message = 'baisc error message'
-    escriba.error(method, message)
+    logger.error(method, message)
 
     expect(spyFn).toBeCalledWith(message, expect.objectContaining({
       from: {

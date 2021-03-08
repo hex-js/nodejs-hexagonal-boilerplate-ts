@@ -1,4 +1,4 @@
-import { SQS, AWSError, Response } from 'aws-sdk'
+import { SQS, AWSError } from 'aws-sdk'
 import R from 'ramda'
 import { throwCustomError, EClassError } from '@utils'
 import { PromiseResult } from 'aws-sdk/lib/request'
@@ -6,6 +6,7 @@ import { PromiseResult } from 'aws-sdk/lib/request'
 export type SQSMessageResult<T, U> = {
   readonly operationResult: PromiseResult<U, AWSError>
   readonly value: T | null
+  readonly requestId: string
 }
 
 /**
@@ -24,6 +25,7 @@ export const sendMessage = <T>(sqs: SQS, queueUrl: string) => async <A = T>(body
     }
     const operationResult = await sqs.sendMessage(params).promise()
     const value = { ...body }
+    const requestId = operationResult.$response.requestId
 
     if (typeof operationResult.MessageId === 'undefined') {
       return throwCustomError(new Error('No message id response'), methodPath, EClassError.INTERNAL)
@@ -31,7 +33,8 @@ export const sendMessage = <T>(sqs: SQS, queueUrl: string) => async <A = T>(body
 
     return {
       operationResult,
-      value
+      value,
+      requestId
     }
   } catch (rejectResponse) {
     if (rejectResponse instanceof Error) {
@@ -64,10 +67,12 @@ export const receiveMessage = <T>(sqs: SQS, queueUrl: string, maxNumberOfMessage
     }
 
     const value = operationResult.Messages.map(message => typeof message.Body !== 'undefined' ? JSON.parse(message.Body) as A : null)
+    const requestId = operationResult.$response.requestId
 
     return {
       operationResult,
-      value
+      value,
+      requestId
     }
   } catch (rejectResponse) {
     if (rejectResponse instanceof Error) {
@@ -87,7 +92,7 @@ export const receiveMessage = <T>(sqs: SQS, queueUrl: string, maxNumberOfMessage
  * @param {string} queueUrl url from sqs queue service from aws.
  * @returns {deleteMessageReturn}
  */
-export const deleteMessage = (sqs: SQS, queueUrl: string) => async (receiptHandle: string): Promise<{ readonly operationResult: { readonly $response: Response<{}, AWSError> }}> => {
+export const deleteMessage = (sqs: SQS, queueUrl: string) => async (receiptHandle: string): Promise<SQSMessageResult<null, {}>> => {
   const methodPath = 'ports.aws-sqs.deleteMessage'
 
   try {
@@ -96,9 +101,12 @@ export const deleteMessage = (sqs: SQS, queueUrl: string) => async (receiptHandl
       ReceiptHandle: receiptHandle
     }
     const operationResult = await sqs.deleteMessage(params).promise()
+    const requestId = operationResult.$response.requestId
 
     return {
-      operationResult
+      operationResult,
+      value: null,
+      requestId
     }
   } catch (rejectResponse) {
     if (rejectResponse instanceof Error) {

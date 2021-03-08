@@ -1,11 +1,11 @@
-import { EscribaLogger } from '@ports/logger'
+import { LoggerInstance } from '@ports/logger'
 
 /**
  * @description Get Task by id
  *
- * @param {EscribaLogger} escriba instance of escriba
+ * @param {LoggerInstance} logger instance of logger
  */
-export const ping = (escriba: EscribaLogger) => async (): Promise<string> => {
-  escriba.info('api.controller.index.ping', 'send result ping')
+export const ping = (logger: LoggerInstance) => async (): Promise<string> => {
+  logger.info('api.controller.index.ping', 'send result ping')
   return 'pong'
 }

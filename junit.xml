@@ -169,7 +169,7 @@
     </testcase>
     <testcase classname="config appConfig" name="config appConfig" time="0.002">
     </testcase>
-    <testcase classname="config escribaConf" name="config escribaConf" time="0.001">
+    <testcase classname="config loggerConf" name="config loggerConf" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>

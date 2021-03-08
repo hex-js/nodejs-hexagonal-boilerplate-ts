@@ -33,7 +33,7 @@
       }],
       "functional/no-try-statement": [ "off" ],
       "functional/no-expression-statement": ["error", {
-        "ignorePattern": ["escriba", "AWSConfig", ".use", ".on", ".listen"]
+        "ignorePattern": ["logger", "AWSConfig", ".use", ".on", ".listen"]
       }],
       "functional/no-conditional-statement": ["error", {
         "allowReturningBranches": true

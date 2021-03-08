@@ -5,7 +5,7 @@ import {
   throwCustomError
 } from '@utils'
 import { validateUpdateTodo, validateCreateTodo, validateDeleteTodo } from '@business/todo'
-import { EscribaLogger } from '@ports/logger'
+import { LoggerInstance } from '@ports/logger'
 
 export type TodoAdapterInstance = {
   readonly getTodo: (id: string) => Promise<Todo | null>
@@ -18,14 +18,14 @@ export type TodoAdapterInstance = {
  * @description Todo adapter factory
  * @memberof adapters
  * @function
- * @param {EscribaLogger} escriba instance of escriba logger
+ * @param {LoggerInstance} logger instance of logger
  * @param {DynamoRepositoryInstance<Todo>} repository Dynamo database methods
  */
-const todoAdapterFactory = (escriba: EscribaLogger, repository: DynamoRepositoryInstance<Todo>): TodoAdapterInstance => ({
+const todoAdapterFactory = (logger: LoggerInstance, repository: DynamoRepositoryInstance<Todo>): TodoAdapterInstance => ({
   getTodo: getTodo(repository),
-  createTodo: createTodo(escriba, repository),
-  updateTodo: updateTodo(escriba, repository),
-  deleteTodo: deleteTodo(escriba, repository)
+  createTodo: createTodo(logger, repository),
+  updateTodo: updateTodo(logger, repository),
+  deleteTodo: deleteTodo(logger, repository)
 })
 
 export default todoAdapterFactory
@@ -49,10 +49,10 @@ const getTodo = (repository: DynamoRepositoryInstance<Todo>) => async (id: strin
 /**
  * @description Create todo in the DynamoDB.
  * @function
- * @param {EscribaLogger} escriba instance of escriba
+ * @param {LoggerInstance} logger instance of logger
  * @param {DynamoRepositoryInstance<Todo>} repository Dynamo database methods
  */
-const createTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance<Todo>) => async (params: CreateTodoInput, user: string) => {
+const createTodo = (logger: LoggerInstance, repository: DynamoRepositoryInstance<Todo>) => async (params: CreateTodoInput, user: string) => {
   const methodPath = 'adapters.todo.createTodo'
   try {
     const result = await repository
@@ -63,7 +63,7 @@ const createTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance
         )
       )
 
-    escriba.info(methodPath, {
+    logger.info(methodPath, {
       action: 'TASK_CREATED',
       method: methodPath,
       data: { ...result }
@@ -79,10 +79,10 @@ const createTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance
  * @description Update todo in the DynamoDB.
  * @function
  * @throws {CustomError}
- * @param {EscribaLogger} escriba instance of escriba
+ * @param {LoggerInstance} logger instance of logger
  * @param {DynamoRepositoryInstance<Todo>} repository Dynamo database methods
  */
-const updateTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance<Todo>) => async (id: string, params: MutateTodoInput, user: string): Promise<Todo> => {
+const updateTodo = (logger: LoggerInstance, repository: DynamoRepositoryInstance<Todo>) => async (id: string, params: MutateTodoInput, user: string): Promise<Todo> => {
   const methodPath = 'adapters.todo.updateTodo'
   try {
     const currObject = await getTodo(repository)(id)
@@ -108,7 +108,7 @@ const updateTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance
     )
 
     // log report data
-    escriba.info(methodPath, {
+    logger.info(methodPath, {
       action: 'TASK_UPDATED',
       method: methodPath,
       data: result
@@ -128,10 +128,10 @@ const updateTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance
  * @description delete todo in the DynamoDB.
  * @function
  * @throws {CustomError}
- * @param {EscribaLogger} escriba instance of escriba
+ * @param {LoggerInstance} logger instance of logger
  * @param {DynamoRepositoryInstance<Todo>} repository Dynamo database methods
  */
-const deleteTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance<Todo>) => async (id: string, user: string) => {
+const deleteTodo = (logger: LoggerInstance, repository: DynamoRepositoryInstance<Todo>) => async (id: string, user: string) => {
   const methodPath = 'adapters.todo.deleteTodo'
   try {
     const currentObj = await getTodo(repository)(id)
@@ -145,7 +145,7 @@ const deleteTodo = (escriba: EscribaLogger, repository: DynamoRepositoryInstance
     const result = await repository.deleteDocument({ id })
 
     // log report data
-    escriba.info(methodPath, {
+    logger.info(methodPath, {
       action: 'TASK_DELETED',
       method: methodPath,
       data: {

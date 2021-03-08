@@ -1,7 +1,7 @@
 import { DynamoRepositoryInstance } from '@ports/aws-dynamo'
 import { Todo } from '@models'
 import todoAdapterFactory, { TodoAdapterInstance } from './todo'
-import { EscribaLogger } from '@ports/logger'
+import { LoggerInstance } from '@ports/logger'
 
 export type AdapterFacade = {
   readonly todo: TodoAdapterInstance
@@ -11,9 +11,9 @@ export type AdapterFacade = {
  * @description dynamo repository for state machine
  *
  * @function
- * @param {Logger} escriba - Instance of escriba.
+ * @param {Logger} logger - Instance of logger.
  * @param {DynamoRepositoryInstance} repository repository instatiated
  */
-export const adapter = (escriba: EscribaLogger, repository: DynamoRepositoryInstance<Todo>): AdapterFacade => ({
-  todo: todoAdapterFactory(escriba, repository)
+export const adapter = (logger: LoggerInstance, repository: DynamoRepositoryInstance<Todo>): AdapterFacade => ({
+  todo: todoAdapterFactory(logger, repository)
 })
