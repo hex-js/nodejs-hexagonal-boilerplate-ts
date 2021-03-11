@@ -99,7 +99,8 @@
     "standard": "^14.3.4",
     "ts-jest": "^26.4.0",
     "ts-node-dev": "^1.0.0-pre.63",
-    "tsconfig-paths": "^3.9.0"
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^4.2.3"
   },
   "resolutions": {
     "ini": ">1.3.6"
