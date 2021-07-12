@@ -6,7 +6,7 @@ jobs:
   build-and-test:
     executor:
       name: node/default
-      tag: "14.16.0"
+      tag: "14.17.3"
     steps:
       - run: sudo apt-get update
       - run: sudo apt-get install -y tzdata
@@ -22,7 +22,7 @@ jobs:
   build-and-test-and-send-to-stryker:
     executor:
       name: node/default
-      tag: "14.16.0"
+      tag: "14.17.3"
     steps:
       - run: sudo apt-get update
       - run: sudo apt-get install -y tzdata
