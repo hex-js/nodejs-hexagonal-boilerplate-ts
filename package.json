@@ -7,7 +7,7 @@
     "build": "babel src --extensions \".js,.ts,.json\" --out-dir dist --copy-files --no-copy-ignored",
     "watch": "babel src --watch --extensions \".js,.ts,.json\" --out-dir dist --copy-files --no-copy-ignored",
     "depcheck": "depcheck",
-    "test-ci": "cross-env ENV_NAME=test jest --ci --reporters=jest-junit --outputFile=./test-results/jest",
+    "test-ci": "cross-env ENV_NAME=test jest --runInBand --ci --reporters=jest-junit --outputFile=./test-results/jest",
     "start": "node dist/ports/http/server",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/ports/http/server.ts",
     "test": "cross-env ENV_NAME=test jest --verbose --runInBand",
